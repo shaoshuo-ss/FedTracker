@@ -34,7 +34,7 @@ def load_args():
     parser.add_argument('--lr_decay', type=float, default=0.999)
 
     # test set settings
-    parser.add_argument('--test_bs', type=int, default=512, help="test batch size")
+    parser.add_argument('--test_bs', type=int, default=256, help="test batch size")
     parser.add_argument('--test_interval', type=int, default=1)
 
     # model arguments
