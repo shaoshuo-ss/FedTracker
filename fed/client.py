@@ -1,8 +1,6 @@
 # -*- coding: UTF-8 -*-
-import torch
 from torch.utils.data import DataLoader
 
-from utils.models import get_model
 from utils.train import *
 from utils.datasets import *
 

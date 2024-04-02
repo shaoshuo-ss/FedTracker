@@ -3,7 +3,6 @@ import copy
 
 import numpy as np
 from torch import nn
-# from sko.GA import GA
 import torch
 import random
 from geneal.genetic_algorithms import BinaryGenAlgSolver
@@ -19,7 +18,6 @@ def dec2bin(num, length):
             mid.append(-1)
         else:
             mid.append(1)
-        # mid.append(int(rem))
     while len(mid) < length:
         mid.insert(0, -1)
     return mid
@@ -41,10 +39,6 @@ def generate_fingerprints(num_clients, length):
         selection_rate=0.5, # percentage of the population to select for mating
     )
     solver.solve()
-    # ga = GA(minimum_hamming_distance, num_clients, size_pop=20,
-        # max_iter=100, lb=1, ub=2 ** length - 1, precision=0.99999)
-    # x_best, y_best = ga.run()
-    # print("Minimum hamming distance:" + str(-y_best[0]))
     fingerprints = []
     count = 0
     for i in range(num_clients):
@@ -52,9 +46,6 @@ def generate_fingerprints(num_clients, length):
         fingerprint[fingerprint == 0.0] = -1.0
         fingerprints.append(fingerprint)
         count += length
-    # for i in fingerprints_int:
-    # for i in solver.best_individual_:
-        # fingerprints.append(np.array(dec2bin(int(i), length)))
     return fingerprints
 
 
@@ -62,20 +53,20 @@ def hamming_distance(a, b):
     return bin(int(a) ^ int(b)).count("1")
 
 
-def minimum_hamming_distance(fingerprints):
-    n = len(fingerprints)
-    min_hamming = 100000
-    for i in range(n):
-        if sum(x[i] == np.ones(x[i].shape)) == 0:
-            return -100000
-        for j in range(i + 1, n):
-            # distance = hamming_distance(int(fingerprints[i]), int(fingerprints[j]))
-            distance = sum(fingerprints[i] != fingerprints[j])
-            if distance == 0:
-                return -100000
-            if distance < min_hamming:
-                min_hamming = distance
-    return min_hamming
+# def minimum_hamming_distance(fingerprints):
+#     n = len(fingerprints)
+#     min_hamming = 100000
+#     for i in range(n):
+#         if sum(x[i] == np.ones(x[i].shape)) == 0:
+#             return -100000
+#         for j in range(i + 1, n):
+#             # distance = hamming_distance(int(fingerprints[i]), int(fingerprints[j]))
+#             distance = sum(fingerprints[i] != fingerprints[j])
+#             if distance == 0:
+#                 return -100000
+#             if distance < min_hamming:
+#                 min_hamming = distance
+#     return min_hamming
 
 
 def get_minimum_hamming_distance_func(num_clients, length):
@@ -102,7 +93,6 @@ def generate_extracting_matrices(weight_size, total_length, num_clients):
     extracting_matrices = []
     for i in range(num_clients):
         extracting_matrices.append(np.random.standard_normal((total_length, weight_size)).astype(np.float32))
-        # extracting_matrices.append(np.random.choice(bit_num, (total_length, weight_size)).astype(np.float32))
     return extracting_matrices
 
 
@@ -136,7 +126,6 @@ def calculate_local_grad(layers, local_fingerprint, extracting_metrix, epsilon=0
 
 
 def extracting_fingerprints(layers, local_fingerprints, extracting_matrices, epsilon=0.5, hd=False):
-    # ber = np.zeros(len(local_fingerprints))
     min_ber = 100000
     min_idx = 0
     max_score = -100000
@@ -186,13 +175,3 @@ def get_embed_layers_length(model, embed_layer_names):
     for embed_layer in embed_layers:
         weight_size += embed_layer.weight.shape[0]
     return weight_size
-
-
-if __name__ == '__main__':
-    x = generate_fingerprints(50, 1024)
-    print(minimum_hamming_distance(x))
-    # print(len(x))
-    # print(y)
-    # a = np.array([2.2, 3.0])
-    # b = np.array([1.0, -1.0])
-    # print(np.multiply(a, b))

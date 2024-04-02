@@ -67,7 +67,7 @@ def gem_train(model):
             # check
             dotp = torch.mul(grads.view(-1), memory.view(-1))
             if dotp.sum() < 0:
-                newgrads = project2cone2(grads.view(-1).unsqueeze(1), memory.view(-1, 1))
+                newgrads = project2cone2(grads.view(-1).unsqueeze(1), memory.view(-1, 1)) # conduct projection
                 param.grad.data.copy_(newgrads.view(grad_size))
     return model
 

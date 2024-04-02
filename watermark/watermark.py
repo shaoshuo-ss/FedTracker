@@ -73,7 +73,6 @@ def generate_waffle_pattern(args):
     print(trigger_set_mean, trigger_set_std)
     dataset = NumpyLoader(trigger_set, trigger_set_labels, transformer=transforms.Compose([
                                     transforms.ToTensor(),
-                                    # transforms.RandomHorizontalFlip(),
                                     transforms.Normalize(trigger_set_mean, trigger_set_std)
                                 ]))
     return dataset

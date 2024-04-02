@@ -13,11 +13,13 @@ from fed.client import create_clients
 from fed.server import FedAvg
 from utils.datasets import get_full_dataset
 from utils.models import get_model
-from utils.test import test_img, test_img_top5
+from utils.test import test_img
 from utils.train import get_optim, gem_train, set_bn_eval
 from utils.utils import printf, load_args
 from watermark.fingerprint import *
 from watermark.watermark import *
+from tqdm import tqdm
+
 
 if __name__ == '__main__':
     args = load_args()
@@ -43,12 +45,6 @@ if __name__ == '__main__':
     # initialize global watermark and local fingerprints
     if args.watermark or args.fingerprint:
         # get weight size
-        
-        # embed_layer_name = args.embed_layer.split('.')
-        # embed_layer = global_model
-        # for name in embed_layer_name:
-        #     embed_layer = getattr(embed_layer, name)
-        # weight_size = embed_layer.weight.shape[0]
         weight_size = get_embed_layers_length(global_model, args.embed_layer_names)
 
         # generate fingerprints
@@ -75,13 +71,13 @@ if __name__ == '__main__':
     acc_best = None
     client_acc_best = [0 for i in range(args.num_clients)]
     num_clients_each_iter = max(min(args.num_clients, args.num_clients_each_iter), 1)
-    for epoch in range(args.start_epochs, args.epochs):
+    for epoch in tqdm(range(args.start_epochs, args.epochs)):
         start_time = time.time()
         local_losses = []
         local_models = []
         local_nums = []
 
-        # adjust learning rate
+        # adjust local learning rate
         for client in clients:
             client.local_lr *= args.lr_decay
         clients_idxs = np.random.choice(range(args.num_clients), num_clients_each_iter, replace=False)
@@ -95,7 +91,6 @@ if __name__ == '__main__':
             local_nums.append(num_samples)
         # aggregation
         global_model.load_global_model(FedAvg(local_models, local_nums), args.device, args.gem)
-        # global_model.load_state_dict(FedAvg(local_models, local_nums))
 
         # print loss
         avg_loss = sum(local_losses) / len(local_losses)
@@ -141,12 +136,9 @@ if __name__ == '__main__':
                     client_fingerprint = local_fingerprints[client_idx]
                     client_model = copy.deepcopy(global_model)
                     embed_layers = get_embed_layers(client_model, args.embed_layer_names)
-                    # embed_layer = client_model
-                    # for name in embed_layer_name:
-                    #     embed_layer = getattr(embed_layer, name)
-                    ber, extract_idx = extracting_fingerprints(embed_layers, local_fingerprints, extracting_matrices)
+                    fss, extract_idx = extracting_fingerprints(embed_layers, local_fingerprints, extracting_matrices)
                     count = 0
-                    while (extract_idx != client_idx or (client_idx == extract_idx and ber < 0.85))  and count <= args.fingerprint_max_iters:
+                    while (extract_idx != client_idx or (client_idx == extract_idx and fss < 0.85))  and count <= args.fingerprint_max_iters:
                         client_grad = calculate_local_grad(embed_layers,
                                                         client_fingerprint,
                                                         extracting_matrices[client_idx])
@@ -157,9 +149,8 @@ if __name__ == '__main__':
                             embed_layer.weight = torch.nn.Parameter(torch.add(embed_layer.weight, client_grad[weight_count: weight_count + weight_length]))
                             weight_count += weight_length
                         count += 1
-                        ber, extract_idx = extracting_fingerprints(embed_layers, local_fingerprints, extracting_matrices)
-                    # ber, extract_idx = extracting_fingerprints(embed_layer, local_fingerprints, extracting_matrices)
-                    printf("(Client_idx:{}, Result_idx:{}, BER:{})".format(client_idx, extract_idx, ber), log_path)
+                        fss, extract_idx = extracting_fingerprints(embed_layers, local_fingerprints, extracting_matrices)
+                    printf("(Client_idx:{}, Result_idx:{}, FSS:{})".format(client_idx, extract_idx, fss), log_path)
                     clients[client_idx].set_model(client_model)
             else:
                 for client in clients:
@@ -172,23 +163,20 @@ if __name__ == '__main__':
         # testing
         if (epoch + 1) % args.test_interval == 0:
             if args.watermark:
-                # avg_acc = 0.0
                 avg_watermark_acc = 0.0
-                avg_ber = 0.0
-                # max_acc = 0.0
+                avg_fss = 0.0
                 client_acc = []
                 client_acc_top5 = []
                 for client_idx in range(args.num_clients):
                     acc, acc_top5 = test_img(clients[client_idx].model, test_dataset, args)
                     watermark_acc, _ = test_img(clients[client_idx].model, trigger_set, args)
-                    # avg_acc += acc
                     client_acc.append(acc)
                     client_acc_top5.append(acc_top5)
                     avg_watermark_acc += watermark_acc
                     if args.fingerprint:
                         embed_layers = get_embed_layers(clients[client_idx].model, args.embed_layer_names)
-                        ber, extract_idx = extracting_fingerprints(embed_layers, local_fingerprints, extracting_matrices)
-                        avg_ber += ber
+                        fss, extract_idx = extracting_fingerprints(embed_layers, local_fingerprints, extracting_matrices)
+                        avg_fss += fss
                     if acc >= client_acc_best[client_idx]:
                         client_acc_best[client_idx] = acc
                         if args.save:
@@ -206,13 +194,13 @@ if __name__ == '__main__':
                 low_acc_top5 = np.percentile(client_acc_top5, 25)
                 high_acc_top5 = np.percentile(client_acc_top5, 75)
                 avg_watermark_acc = avg_watermark_acc / args.num_clients
-                avg_ber = avg_ber / args.num_clients
+                avg_fss = avg_fss / args.num_clients
                 printf("Clients Average Testing accuracy: {:.2f}".format(avg_acc), log_path)
                 printf("Clients Quantile Testing accuracy, Top1: {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}".format(min_acc, low_acc, median_acc, high_acc, max_acc), log_path)
                 printf("Clients Quantile Testing accuracy, Top5: {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}".format(min_acc_top5, low_acc_top5, median_acc_top5, high_acc_top5, max_acc_top5), log_path)
                 printf("Watermark Average Testing accuracy:{:.2f}".format(avg_watermark_acc), log_path)
                 if args.fingerprint:
-                    printf("Average BER: {:.4f}".format(avg_ber), log_path)
+                    printf("Average fss: {:.4f}".format(avg_fss), log_path)
 
     printf("Best Acc of Global Model:" + str(acc_best), log_path)
     if args.watermark:
@@ -225,12 +213,8 @@ if __name__ == '__main__':
         median_acc = np.median(client_acc_best)
         low_acc = np.percentile(client_acc_best, 25)
         high_acc = np.percentile(client_acc_best, 75)
-        # avg_watermark_acc = avg_watermark_acc / args.num_clients
-        # avg_ber = avg_ber / args.num_clients
         printf("Clients Average Testing accuracy: {:.2f}".format(avg_acc), log_path)
         printf("Clients Quantile Testing accuracy: {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}".format(min_acc, low_acc, median_acc, high_acc, max_acc), log_path)
-        # printf("Watermark Average Testing accuracy:{:.2f}".format(avg_watermark_acc), log_path)
-        # printf("Average BER: {:.4f}".format(avg_ber), log_path)
     if args.save:
         torch.save(global_model.state_dict(),
                    args.save_dir + "model_last_epochs_" + str((args.epochs + args.start_epochs)) + ".pth")
