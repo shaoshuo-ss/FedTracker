@@ -34,7 +34,7 @@ def load_args():
     parser.add_argument('--lr_decay', type=float, default=0.999)
 
     # test set settings
-    parser.add_argument('--test_bs', type=int, default=256, help="test batch size")
+    parser.add_argument('--test_bs', type=int, default=512, help="test batch size")
     parser.add_argument('--test_interval', type=int, default=1)
 
     # model arguments
@@ -54,19 +54,14 @@ def load_args():
     parser.add_argument("--watermark", type=lambda x: bool(distutils.util.strtobool(x)), default=True, help="whether embedding the watermark")
     parser.add_argument("--fingerprint", type=lambda x: bool(distutils.util.strtobool(x)), default=True, help="whether to embed the fingerprints")
     parser.add_argument('--lfp_length', type=int, default=128, help="Bit length of local fingerprints")
-    parser.add_argument('--fp_threshold', type=float, default=0.5)
     parser.add_argument('--num_trigger_set', type=int, default=100, help='number of images used as trigger set')
     parser.add_argument('--embed_layer_names', type=str, default='model.bn8')
     parser.add_argument('--freeze_bn', type=lambda x: bool(distutils.util.strtobool(x)), default=True)
-    # For CNN4: extractor.norm2 lfp 64
-    # For VGG16: model.bn8;model.bn9;model.bn10 lfp 128
-    # For ResNet18: layer4.layer1.left.bn1;layer4.layer2.left.bn2 lfp 128
-    # For AlexNet: extractor.bn3;extractor.bn4;extractor.bn5 lfp 128 for 10 clients:extractor.bn4;extractor.bn5
 
-    parser.add_argument('--lambda1', type=float, default=0.0005)
+    parser.add_argument('--lambda1', type=float)
     parser.add_argument('--watermark_max_iters', type=int, default=100)
     parser.add_argument('--fingerprint_max_iters', type=int, default=5)
-    parser.add_argument('--lambda2', type=float, default=0.005)
+    parser.add_argument('--lambda2', type=float)
     parser.add_argument('--gem', type=lambda x: bool(distutils.util.strtobool(x)), default=True, help="whether to use the CL-based watermark embedding methods.")
 
     args = parser.parse_args()

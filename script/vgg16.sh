@@ -11,4 +11,6 @@ python main.py \
     --seed 1 \
     --save_dir "./result/VGG16/" \
     --embed_layer_names "model.bn8;model.bn9;model.bn10" \
+    --lambda1 0.0005 \
+    --lambda2 0.005 \
     --test_interval 10
