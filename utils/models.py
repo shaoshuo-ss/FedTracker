@@ -218,51 +218,6 @@ def ResNet18(args):
     return ResNet(ResidualBlock, args)
 
 
-class AlexNet(nn.Module):
-    def __init__(self, args):
-        super(AlexNet, self).__init__()
-        self.extractor = nn.Sequential(OrderedDict([
-            ('conv1', nn.Conv2d(args.num_channels, 64, kernel_size=5, padding=2)),
-            ('bn1', nn.BatchNorm2d(64)),
-            ('relu1', nn.ReLU(inplace=True)),
-            ('pool1', nn.MaxPool2d(kernel_size=3, stride=2)),
-            ('conv2', nn.Conv2d(64, 192, kernel_size=5, padding=2)),
-            ('bn2', nn.BatchNorm2d(192)),
-            ('relu2', nn.ReLU(inplace=True)),
-            ('pool2', nn.MaxPool2d(kernel_size=3, stride=2)),
-            ('conv3', nn.Conv2d(192, 384, kernel_size=3, stride=1, padding=1)),
-            ('bn3', nn.BatchNorm2d(384)),
-            ('relu3', nn.ReLU(inplace=True)),
-            ('conv4', nn.Conv2d(384, 256, kernel_size=3, stride=1, padding=1)),
-            ('bn4', nn.BatchNorm2d(256)),
-            ('relu4', nn.ReLU(inplace=True)),
-            ('conv5', nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)),
-            ('bn5', nn.BatchNorm2d(256)),
-            ('relu5', nn.ReLU(inplace=True)),
-            ('avgpool', nn.AdaptiveAvgPool2d((1, 1))),
-        ]))
-        self.classifier = nn.Sequential(
-            nn.Linear(256, args.num_classes)
-        )
-        self.memory = dict()
-
-    def forward(self, x):
-        x = self.extractor(x)
-        x = x.view(x.size(0), -1)
-        return self.classifier(x)
-
-    def load_global_model(self, state_dict, device, watermark=False):
-        if watermark:
-            for key in state_dict:
-                old_weights = self.state_dict()[key]
-                new_weights = state_dict[key]
-                if key in self.memory:
-                    self.memory[key] = torch.add(self.memory[key], torch.sub(new_weights, old_weights).to(device))
-                else:
-                    self.memory[key] = torch.sub(new_weights, old_weights).to(device)
-        self.load_state_dict(state_dict)
-
-
 def get_model(args):
     if args.model == 'VGG16':
         return VGG16(args)
@@ -270,8 +225,6 @@ def get_model(args):
         return CNN4(args)
     elif args.model == 'ResNet18':
         return ResNet18(args)
-    elif args.model == 'AlexNet':
-        return AlexNet(args)
     else:
         exit("Unknown Model!")
 
