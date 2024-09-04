@@ -20,7 +20,7 @@ pip install tqdm
 
 After that, running the bash scripts in /bash
 ```
-bash ./script/alexnet.sh
+bash ./script/vgg16.sh
 ```
 
 ## Citing this work
@@ -30,7 +30,7 @@ If you use this repository for academic research, we highly encouraged you to ci
 @article{shao2022fedtracker,
   title={Fedtracker: Furnishing ownership verification and traceability for federated learning model},
   author={Shao, Shuo and Yang, Wenyuan and Gu, Hanlin and Qin, Zhan and Fan, Lixin and Yang, Qiang and Ren, Kui},
-  journal={arXiv preprint arXiv:2211.07160},
-  year={2022}
+  journal={IEEE Transactions on Dependable and Secure Computing},
+  year={2024}
 }
 ```
