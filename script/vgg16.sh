@@ -7,7 +7,7 @@ python main.py \
     --dataset "cifar10" \
     --num_classes 10 \
     --image_size 32 \
-    --gpu 7 \
+    --gpu 0 \
     --seed 1 \
     --save_dir "./result/VGG16/" \
     --embed_layer_names "model.bn8;model.bn9;model.bn10" \
