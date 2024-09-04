@@ -1,6 +1,6 @@
 # FedTracker
 
-This is the official code of paper "FedTracker: Furnishing Ownership Verification and Traceability for Federated Learning Model".
+This is the official code of our TDSC paper "FedTracker: Furnishing Ownership Verification and Traceability for Federated Learning Model".
 
 ## Getting Start
 
