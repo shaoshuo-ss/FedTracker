@@ -28,7 +28,7 @@ bash ./script/vgg16.sh
 If you use this repository for academic research, we highly encouraged you to cite our paper.
 ```
 @article{shao2024fedtracker,
-  title={Fedtracker: Furnishing ownership verification and traceability for federated learning model},
+  title={Fedtracker: Furnishing Ownership Verification and Traceability for Federated Learning Model},
   author={Shao, Shuo and Yang, Wenyuan and Gu, Hanlin and Qin, Zhan and Fan, Lixin and Yang, Qiang and Ren, Kui},
   journal={IEEE Transactions on Dependable and Secure Computing},
   year={2024}
