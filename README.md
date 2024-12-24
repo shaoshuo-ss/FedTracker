@@ -18,7 +18,7 @@ pip install quadprog
 pip install tqdm
 ```
 
-After that, running the bash scripts in /bash
+After that, running the bash scripts in /script
 ```
 bash ./script/vgg16.sh
 ```
