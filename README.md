@@ -37,4 +37,4 @@ If you use this repository for academic research, we highly encourage you to cit
 
 ## Note
 
-A potential issue about `np.resize` is proposed by @FadingVortex. If you encounter some problems when reproducing the code, you can refer to the comment in the issue section to try to fix this issue. (Thanks again for the comment of @FadingVortex)
+A potential issue about `np.resize` is proposed by @FadingVortex. If you encounter some problems when reproducing the code, please refer to the comment in the issue section to try to fix this issue. (Thanks again for the comment of @FadingVortex)
