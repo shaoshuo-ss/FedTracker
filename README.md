@@ -25,7 +25,7 @@ bash ./script/vgg16.sh
 
 ## Citing this work
 
-If you use this repository for academic research, we highly encouraged you to cite our paper.
+If you use this repository for academic research, we highly encourage you to cite our paper.
 ```
 @article{shao2024fedtracker,
   title={Fedtracker: Furnishing Ownership Verification and Traceability for Federated Learning Model},
@@ -34,3 +34,7 @@ If you use this repository for academic research, we highly encouraged you to ci
   year={2024}
 }
 ```
+
+## Note
+
+A potential issue about `np.resize` is proposed by @FadingVortex. If you encounter some problems when reproducing the code, you can refer to the comment in the issue section to try to fix this issue. (Thanks again for the comment of @FadingVortex)
