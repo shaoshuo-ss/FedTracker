@@ -52,8 +52,8 @@ def generate_waffle_pattern(args):
             pattern = pattern.convert("L")
         else:
             pattern = pattern.convert("RGB")
+        pattern = pattern.resize((args.image_size, args.image_size), Image.BILINEAR)
         pattern = np.array(pattern)
-        pattern = np.resize(pattern, (args.image_size, args.image_size, args.num_channels))
         base_patterns.append(pattern)
     trigger_set = []
     trigger_set_labels = []
